@@ -32,7 +32,23 @@ app.get("/", (req, res, next) => {
 
 // GET
 app.get("/api/users", (req, res, next) => {
-    var sql = "select * from Users"
+    // parseInt attempts to parse the value to an integer
+    // it returns a special "NaN" value when it is Not a Number.
+    var page = parseInt(req.query.page, 10);
+    if (isNaN(page) || page < 1) {
+        page = 1;
+    }
+    var limit = parseInt(req.query.limit, 10);
+    if (isNaN(limit)) {
+        limit = 10;
+    } else if (limit > 50) {
+        limit = 50;
+    } else if (limit < 1) {
+        limit = 1;
+    }
+    var offset = (page - 1) * limit;
+    
+    var sql = "select * from Users" + " LIMIT " + limit + " OFFSET " + offset
     var params = []
     db.all(sql, params, (err, rows) => {
         if (err) {
